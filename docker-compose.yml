@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: evidence_locker_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
+      POSTGRES_DB: ${POSTGRES_DB:-evidence_locker_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-evidence_locker_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Express.js Backend API Service
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: evidence_locker_server
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres_password}@postgres:5432/${POSTGRES_DB:-evidence_locker_db}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_development_only}
+      CORS_ORIGIN: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  # FastAPI AI Processing Service
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: evidence_locker_ai_service
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+    volumes:
+      - ./ai-service:/app
+
+  # React Frontend Web Application
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: evidence_locker_client
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost:5000/api/v1
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+    driver: local
