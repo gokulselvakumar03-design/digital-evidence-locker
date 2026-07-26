@@ -1,16 +1,58 @@
+import { body, validationResult } from 'express-validator';
+import { Request, Response, NextFunction } from 'express';
+import { ApiError } from '../../utils/apiError.js';
+
 /**
- * Authentication Input Validator Signatures
- * Path: server/src/modules/auth/auth.validator.ts
- * Purpose: Validation schemas and functions for auth payloads (Register, Login).
- * Note: Left empty for developer schema definition.
+ * Validation Result Middleware Wrapper
+ * Intercepts express-validator errors and throws ApiError(400) if validation fails.
  */
-
-export const validateRegisterPayload = (_payload: any): boolean => {
-  // Developer Stub: Validate register request body schema
-  return true;
+export const validateRequest = (req: Request, _res: Response, next: NextFunction): void => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorMessages = errors.array().map((err) => err.msg).join(', ');
+    throw new ApiError(400, `Validation Error: ${errorMessages}`);
+  }
+  next();
 };
 
-export const validateLoginPayload = (_payload: any): boolean => {
-  // Developer Stub: Validate login request body schema
-  return true;
-};
+/**
+ * Registration Input Validation Pipeline
+ */
+export const registerValidation = [
+  body('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Name is required'),
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  body('password')
+    .trim()
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  validateRequest,
+];
+
+/**
+ * Login Input Validation Pipeline
+ */
+export const loginValidation = [
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  body('password')
+    .trim()
+    .notEmpty()
+    .withMessage('Password is required'),
+  validateRequest,
+];
