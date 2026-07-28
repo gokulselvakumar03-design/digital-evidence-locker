@@ -4,7 +4,9 @@ import { CreateCaseDto, UpdateCaseDto, CaseQueryDto, UpdateCaseStatusDto, Assign
 import { ICaseDetail, IPaginatedCasesResponse } from './cases.interface.js';
 import { ApiError } from '../../utils/apiError.js';
 import { IJwtPayload } from '../../utils/jwt.helper.js';
-import { CaseStatus, CasePriority } from '@prisma/client';
+import { CaseStatus, CasePriority, AuditAction, NotificationType } from '@prisma/client';
+import { auditService } from '../audit/audit.service.js';
+import { notificationService } from '../notifications/notifications.service.js';
 
 /**
  * Case Business Logic Service
@@ -43,7 +45,7 @@ export class CaseService {
     const caseNumber = await this.generateCaseNumber();
     const priority = (dto.priority as CasePriority) || CasePriority.MEDIUM;
 
-    return caseRepository.createCase({
+    const createdCase = await caseRepository.createCase({
       caseNumber,
       title: dto.title,
       description: dto.description,
@@ -52,6 +54,17 @@ export class CaseService {
       createdById: currentUser.userId,
       assignedToId: dto.assignedToId,
     });
+
+    await auditService.createLog({
+      action: AuditAction.CREATE_CASE,
+      entityType: 'CASE',
+      entityId: createdCase.id,
+      description: `Created new case ${createdCase.caseNumber}: '${createdCase.title}'`,
+      performedById: currentUser.userId,
+      newValue: { caseNumber: createdCase.caseNumber, title: createdCase.title },
+    });
+
+    return createdCase;
   }
 
   /**
@@ -131,7 +144,30 @@ export class CaseService {
       }
     }
 
-    return caseRepository.updateCase(id, dto);
+    const updatedCase = await caseRepository.updateCase(id, dto);
+
+    await auditService.createLog({
+      action: AuditAction.UPDATE_CASE,
+      entityType: 'CASE',
+      entityId: id,
+      description: `Updated case file details for ${caseItem.caseNumber}`,
+      performedById: currentUser.userId,
+      oldValue: { title: caseItem.title, priority: caseItem.priority },
+      newValue: dto,
+    });
+
+    if (caseItem.assignedToId && caseItem.assignedToId !== currentUser.userId) {
+      await notificationService.createNotification({
+        title: `Case Updated: ${caseItem.caseNumber}`,
+        message: `Case '${caseItem.title}' details have been updated.`,
+        type: NotificationType.CASE_UPDATED,
+        userId: caseItem.assignedToId,
+        entityType: 'CASE',
+        entityId: id,
+      });
+    }
+
+    return updatedCase;
   }
 
   /**
@@ -161,7 +197,33 @@ export class CaseService {
       closedAt = null; // Re-opened case
     }
 
-    return caseRepository.changeCaseStatus(id, targetStatus, closedAt);
+    const updatedCase = await caseRepository.changeCaseStatus(id, targetStatus, closedAt);
+
+    await auditService.createLog({
+      action: AuditAction.CHANGE_CASE_STATUS,
+      entityType: 'CASE',
+      entityId: id,
+      description: `Changed status of case ${caseItem.caseNumber} from ${caseItem.status} to ${targetStatus}`,
+      performedById: currentUser.userId,
+      oldValue: { status: caseItem.status },
+      newValue: { status: targetStatus },
+    });
+
+    if (targetStatus === CaseStatus.CLOSED || targetStatus === CaseStatus.ARCHIVED) {
+      const notifyUserId = caseItem.assignedToId || caseItem.createdById;
+      if (notifyUserId && notifyUserId !== currentUser.userId) {
+        await notificationService.createNotification({
+          title: `Case Closed: ${caseItem.caseNumber}`,
+          message: `Case '${caseItem.title}' has been marked as ${targetStatus}.`,
+          type: NotificationType.CASE_CLOSED,
+          userId: notifyUserId,
+          entityType: 'CASE',
+          entityId: id,
+        });
+      }
+    }
+
+    return updatedCase;
   }
 
   /**
@@ -185,7 +247,28 @@ export class CaseService {
       throw new ApiError(404, 'Target investigator user not found');
     }
 
-    return caseRepository.assignCase(id, dto.assignedToId);
+    const assignedCase = await caseRepository.assignCase(id, dto.assignedToId);
+
+    await auditService.createLog({
+      action: AuditAction.ASSIGN_CASE,
+      entityType: 'CASE',
+      entityId: id,
+      description: `Assigned case ${caseItem.caseNumber} to user ${assignedUser.email}`,
+      performedById: currentUser.userId,
+      oldValue: { assignedToId: caseItem.assignedToId },
+      newValue: { assignedToId: dto.assignedToId },
+    });
+
+    await notificationService.createNotification({
+      title: `Case Assigned: ${caseItem.caseNumber}`,
+      message: `You have been assigned to case '${caseItem.title}'.`,
+      type: NotificationType.CASE_ASSIGNED,
+      userId: dto.assignedToId,
+      entityType: 'CASE',
+      entityId: id,
+    });
+
+    return assignedCase;
   }
 
   /**
@@ -205,6 +288,14 @@ export class CaseService {
     }
 
     await caseRepository.softDeleteCase(id);
+
+    await auditService.createLog({
+      action: AuditAction.DELETE_CASE,
+      entityType: 'CASE',
+      entityId: id,
+      description: `Soft-deleted case file ${caseItem.caseNumber}`,
+      performedById: currentUser.userId,
+    });
   }
 }
 

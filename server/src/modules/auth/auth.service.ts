@@ -4,7 +4,8 @@ import { IUserProfileResponse } from './auth.interface.js';
 import { PasswordHelper } from '../../utils/password.helper.js';
 import { JwtHelper } from '../../utils/jwt.helper.js';
 import { ApiError } from '../../utils/apiError.js';
-import { Role } from '@prisma/client';
+import { Role, AuditAction } from '@prisma/client';
+import { auditService } from '../audit/audit.service.js';
 
 /**
  * Authentication Business Logic Service
@@ -84,7 +85,16 @@ export class AuthService {
       role: user.role,
     });
 
-    // 5. Return token and user profile
+    // 5. Audit Log Entry
+    await auditService.createLog({
+      action: AuditAction.LOGIN,
+      entityType: 'AUTH',
+      entityId: user.id,
+      description: `User ${user.email} logged in successfully`,
+      performedById: user.id,
+    });
+
+    // 6. Return token and user profile
     return {
       token,
       user: {

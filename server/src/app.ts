@@ -19,6 +19,7 @@ import notificationRoutes from './modules/notifications/notifications.routes.js'
 import analyticsRoutes from './modules/analytics/analytics.routes.js';
 import adminRoutes from './modules/admin/admin.routes.js';
 import aiRoutes from './modules/ai/ai.routes.js';
+import auditRoutes from './modules/audit/audit.routes.js';
 
 /**
  * Express Application Setup
@@ -75,6 +76,7 @@ apiV1Router.use('/notifications', notificationRoutes);
 apiV1Router.use('/analytics', analyticsRoutes);
 apiV1Router.use('/admin', adminRoutes);
 apiV1Router.use('/ai', aiRoutes);
+apiV1Router.use('/audit', auditRoutes);
 
 app.use('/api/v1', apiV1Router);
 

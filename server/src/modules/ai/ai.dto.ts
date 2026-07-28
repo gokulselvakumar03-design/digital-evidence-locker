@@ -1,17 +1,29 @@
+import { AnalysisType, AnalysisStatus } from '@prisma/client';
+
 /**
- * AI Gateway Data Transfer Objects (DTOs)
+ * AI Module Data Transfer Objects (DTOs)
  * Path: server/src/modules/ai/ai.dto.ts
- * Purpose: Request payloads for requesting Whisper, EasyOCR, and Gemini analysis.
+ * Purpose: Request payload schemas for AI analysis requests, semantic search, and querying history.
  */
 
-export interface TranscribeRequestDto {
+export interface AnalyzeEvidenceDto {
   evidenceId: string;
+  analysisType?: AnalysisType;
+  query?: string;
+  options?: any;
 }
 
-export interface OcrRequestDto {
-  evidenceId: string;
+export interface SemanticSearchDto {
+  query: string;
+  caseId?: string;
+  evidenceId?: string;
 }
 
-export interface SummarizeCaseDto {
-  caseId: string;
+export interface AIQueryDto {
+  page?: number | string;
+  limit?: number | string;
+  evidenceId?: string;
+  analysisType?: AnalysisType | string;
+  status?: AnalysisStatus | string;
+  sort?: string;
 }

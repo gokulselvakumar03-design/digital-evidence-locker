@@ -1,11 +1,22 @@
 /**
  * Comments Data Transfer Objects (DTOs)
  * Path: server/src/modules/comments/comments.dto.ts
- * Purpose: Request schemas for creating and querying comments.
+ * Purpose: Request payloads for creating, updating, and querying comments.
  */
 
 export interface CreateCommentDto {
-  caseId: string;
-  evidenceId?: string;
   content: string;
+  caseId?: string;
+  evidenceId?: string;
+  parentCommentId?: string;
+}
+
+export interface UpdateCommentDto {
+  content: string;
+}
+
+export interface CommentQueryDto {
+  page?: number | string;
+  limit?: number | string;
+  search?: string;
 }
