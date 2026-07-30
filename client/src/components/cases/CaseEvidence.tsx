@@ -31,8 +31,8 @@ export const CaseEvidence = ({ evidence }: CaseEvidenceProps) => {
                 <td className="px-3 py-4 text-sm text-slate-600">{item.type}</td>
                 <td className="px-3 py-4 text-sm text-slate-600">{item.uploadedBy ?? 'Unknown'}</td>
                 <td className="px-3 py-4 text-sm text-slate-600">{item.uploadedAt}</td>
-                <td className="px-3 py-4"><Badge tone={item.integrityStatus === 'Verified' ? 'emerald' : 'amber'}>{item.integrityStatus ?? 'Pending'}</Badge></td>
-                <td className="px-3 py-4"><Badge tone={item.reviewStatus === 'Approved' ? 'emerald' : 'amber'}>{item.reviewStatus ?? 'Pending'}</Badge></td>
+                <td className="px-3 py-4"><Badge tone={item.integrityStatus === 'VERIFIED' ? 'emerald' : item.integrityStatus === 'FAILED' ? 'rose' : item.integrityStatus === 'FLAGGED' ? 'amber' : 'slate'}>{item.integrityStatus ?? 'PENDING'}</Badge></td>
+                <td className="px-3 py-4"><Badge tone={item.reviewStatus === 'REVIEWED' ? 'emerald' : item.reviewStatus === 'FLAGGED' ? 'amber' : 'slate'}>{item.reviewStatus ?? 'PENDING_REVIEW'}</Badge></td>
               </tr>
             ))}
           </tbody>

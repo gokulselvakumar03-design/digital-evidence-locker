@@ -7,6 +7,8 @@ import CasesPage from '../pages/cases/CasesPage';
 import CaseDetailPage from '../pages/cases/CaseDetailPage';
 import CaseFormPage from '../pages/cases/CaseFormPage';
 import EvidencePage from '../pages/evidence/EvidencePage';
+import EvidenceDetailPage from '../pages/evidence/EvidenceDetailPage';
+import EvidenceUploadPage from '../pages/evidence/EvidenceUploadPage';
 import TimelinePage from '../pages/timeline/TimelinePage';
 import AnalyticsPage from '../pages/analytics/AnalyticsPage';
 import NotificationsPage from '../pages/notifications/NotificationsPage';
@@ -36,6 +38,8 @@ export const AppRoutes = () => {
       <Route path="/cases/:caseId/edit" element={<ProtectedRoute><CaseFormPage /></ProtectedRoute>} />
       <Route path="/cases/:caseId" element={<ProtectedRoute><CaseDetailPage /></ProtectedRoute>} />
       <Route path="/evidence" element={<ProtectedRoute><EvidencePage /></ProtectedRoute>} />
+      <Route path="/evidence/upload" element={<ProtectedRoute><EvidenceUploadPage /></ProtectedRoute>} />
+      <Route path="/evidence/:evidenceId" element={<ProtectedRoute><EvidenceDetailPage /></ProtectedRoute>} />
       <Route path="/timeline" element={<ProtectedRoute><TimelinePage /></ProtectedRoute>} />
       <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />

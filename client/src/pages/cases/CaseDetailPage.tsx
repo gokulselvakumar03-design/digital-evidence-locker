@@ -58,7 +58,7 @@ const CaseDetailPage = () => {
           <Button variant="secondary" onClick={() => navigate(`/cases/${caseItem.id}/edit`)}>
             Edit Case
           </Button>
-          <Button variant="secondary">
+          <Button variant="secondary" onClick={() => navigate(`/evidence/upload?caseId=${caseItem.id}`)}>
             <span className="flex items-center gap-2"><PlusCircle size={16} /> Add Evidence</span>
           </Button>
           <Button variant="ghost">

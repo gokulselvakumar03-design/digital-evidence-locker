@@ -2,7 +2,9 @@ export type UserRole = 'VICTIM' | 'LAWYER' | 'INVESTIGATOR' | 'POLICE_OFFICER' |
 
 export type CaseStatus = 'OPEN' | 'ACTIVE' | 'PENDING_REVIEW' | 'CLOSED';
 export type CasePriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type EvidenceType = 'DOCUMENT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE';
+export type EvidenceType = 'DOCUMENT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' | 'SCREENSHOT' | 'EMAIL' | 'OTHER';
+export type IntegrityStatus = 'VERIFIED' | 'PENDING' | 'FAILED' | 'FLAGGED';
+export type ReviewStatus = 'REVIEWED' | 'PENDING_REVIEW' | 'FLAGGED';
 
 export interface User {
   id: string;
@@ -53,17 +55,44 @@ export interface CaseTimelineEvent {
 
 export interface Evidence {
   id: string;
+  evidenceNumber: string;
   caseId: string;
   title: string;
   description?: string;
   type: EvidenceType;
+  fileName: string;
+  fileSize: string;
+  mimeType: string;
+  uploadedBy: string;
   uploadedAt: string;
-  sizeLabel: string;
-  status: 'VERIFIED' | 'PENDING_REVIEW' | 'REJECTED';
+  collectedAt?: string;
+  location?: string;
+  source?: string;
+  tags?: string[];
+  integrityStatus: IntegrityStatus;
+  reviewStatus: ReviewStatus;
+  sha256Hash?: string;
   hash?: string;
-  uploadedBy?: string;
-  reviewStatus?: string;
-  integrityStatus?: string;
+  status?: 'VERIFIED' | 'PENDING_REVIEW' | 'REJECTED';
+  uploadedByRole?: string;
+}
+
+export interface CustodyEvent {
+  id: string;
+  action: string;
+  performedBy: string;
+  role: string;
+  date: string;
+  time: string;
+  location?: string;
+}
+
+export interface AIAnalysis {
+  id: string;
+  ocrResult: string;
+  speechTranscript: string;
+  category: string;
+  summary: string;
 }
 
 export interface NotificationItem {
@@ -81,6 +110,14 @@ export interface Activity {
   detail: string;
   timestamp: string;
   actor: string;
+}
+
+export interface CommentItem {
+  id: string;
+  author: string;
+  role: string;
+  message: string;
+  timestamp: string;
 }
 
 export interface DashboardStats {

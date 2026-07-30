@@ -45,7 +45,7 @@ const DashboardPage = () => {
                   <p className="font-medium text-slate-900">{item.title}</p>
                   <Badge tone={item.status === 'VERIFIED' ? 'emerald' : 'amber'}>{item.status}</Badge>
                 </div>
-                <p className="mt-1 text-sm text-slate-500">{item.type} • {item.sizeLabel}</p>
+                <p className="mt-1 text-sm text-slate-500">{item.type} • {item.fileSize}</p>
               </div>
             ))}
           </div>
