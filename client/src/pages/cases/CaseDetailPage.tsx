@@ -6,12 +6,12 @@ import { Button } from '../../components/ui/Button';
 import { CaseTabs } from '../../components/cases/CaseTabs';
 import { CaseOverview } from '../../components/cases/CaseOverview';
 import { CaseEvidence } from '../../components/cases/CaseEvidence';
-import { CaseTimeline } from '../../components/cases/CaseTimeline';
 import { CaseTeam } from '../../components/cases/CaseTeam';
 import { CaseActivity } from '../../components/cases/CaseActivity';
 import { CaseStatusBadge } from '../../components/cases/CaseStatusBadge';
 import { PriorityBadge } from '../../components/cases/PriorityBadge';
-import { mockCaseTeam, mockCaseTimeline, mockCases, mockEvidence, mockActivities } from '../../data/mockData';
+import { TimelineExperience } from '../../components/timeline/TimelineExperience';
+import { mockAuditEvents, mockCaseTeam, mockCases, mockEvidence, mockActivities, mockUsers } from '../../data/mockData';
 
 const CaseDetailPage = () => {
   const { caseId } = useParams();
@@ -70,7 +70,16 @@ const CaseDetailPage = () => {
       <CaseTabs tabs={tabs} children={{
         overview: <CaseOverview caseItem={caseItem} evidence={evidence} team={mockCaseTeam} />,
         evidence: <CaseEvidence evidence={evidence} />,
-        timeline: <CaseTimeline events={mockCaseTimeline} />,
+        timeline: (
+          <TimelineExperience
+            events={mockAuditEvents.filter((event) => event.caseId === caseItem.id)}
+            cases={mockCases.filter((item) => item.id === caseItem.id)}
+            users={mockUsers}
+            evidence={mockEvidence}
+            caseScoped
+            showHeader={false}
+          />
+        ),
         team: <CaseTeam members={mockCaseTeam} />,
         activity: <CaseActivity activities={mockActivities} />,
       }} />

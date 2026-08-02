@@ -53,6 +53,39 @@ export interface CaseTimelineEvent {
   actor: string;
 }
 
+export type TimelineEventType = 'CASE' | 'EVIDENCE' | 'INTEGRITY' | 'CUSTODY' | 'REVIEW' | 'COMMENT' | 'SECURITY';
+export type AuditAction =
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'CASE_CREATED'
+  | 'CASE_UPDATED'
+  | 'CASE_STATUS_CHANGED'
+  | 'EVIDENCE_UPLOADED'
+  | 'EVIDENCE_VIEWED'
+  | 'EVIDENCE_DOWNLOADED'
+  | 'EVIDENCE_SHARED'
+  | 'INTEGRITY_VERIFIED'
+  | 'REVIEW_REQUESTED'
+  | 'COMMENT_ADDED';
+export type SecuritySeverity = 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface AuditEvent {
+  id: string;
+  type: TimelineEventType;
+  action: AuditAction;
+  title: string;
+  description: string;
+  timestamp: string;
+  user: string;
+  role: string;
+  caseId?: string;
+  evidenceId?: string;
+  ipAddress?: string;
+  device?: string;
+  location?: string;
+  severity?: SecuritySeverity;
+}
+
 export interface Evidence {
   id: string;
   evidenceNumber: string;
