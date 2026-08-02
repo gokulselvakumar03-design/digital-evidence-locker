@@ -14,30 +14,14 @@ const CaseFormPage = () => {
 
   const handleSubmit = (values: CaseFormValues) => {
     const tags = values.tags ? values.tags.split(',').map((tag) => tag.trim()).filter(Boolean) : [];
-    const nextCase = {
-      ...initialValues,
-      id: initialValues?.id ?? `case-${Date.now()}`,
-      caseNumber: initialValues?.caseNumber ?? `CASE-2026-${String(mockCases.length + 1).padStart(3, '0')}`,
-      title: values.title,
-      description: values.description,
-      type: values.type,
-      priority: values.priority,
-      status: values.status ?? initialValues?.status ?? 'OPEN',
-      client: values.client ?? initialValues?.client,
-      assignedInvestigator: values.assignedInvestigator ?? initialValues?.assignedInvestigator,
-      assignedLawyer: values.assignedLawyer ?? initialValues?.assignedLawyer,
-      incidentDate: values.incidentDate ?? initialValues?.incidentDate,
-      incidentLocation: values.incidentLocation ?? initialValues?.incidentLocation,
-      tags,
-      notes: values.notes ?? initialValues?.notes,
-      updatedAt: new Date().toISOString().slice(0, 10),
-    };
+    const generatedCaseNumber = initialValues?.caseNumber ?? `CASE-2026-${String(mockCases.length + 1).padStart(3, '0')}`;
 
-    if (isEdit) {
-      console.info('Mock case updated', nextCase);
-    } else {
-      console.info('Mock case created', nextCase);
-    }
+    void {
+      tags,
+      generatedCaseNumber,
+      initialValues,
+      values,
+    };
 
     navigate('/cases', { state: { successMessage: isEdit ? 'Case updated successfully.' : 'Case created successfully.' } });
   };

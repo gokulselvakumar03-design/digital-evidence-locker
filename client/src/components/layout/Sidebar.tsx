@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Briefcase, FolderKanban, LayoutDashboard, Menu, MessageSquareText, ShieldCheck, UserCircle2, X } from 'lucide-react';
+import { BarChart3, Briefcase, FolderKanban, LayoutDashboard, Menu, MessageSquareText, ShieldCheck, UserCircle2, Users, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Analytics', path: '/analytics', icon: BarChart3 },
   { label: 'Notifications', path: '/notifications', icon: MessageSquareText },
   { label: 'Profile', path: '/profile', icon: UserCircle2 },
+  { label: 'Admin', path: '/admin', icon: Users },
 ];
 
 interface SidebarProps {

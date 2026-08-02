@@ -128,13 +128,31 @@ export interface AIAnalysis {
   summary: string;
 }
 
+export type NotificationCategory = 'ALL' | 'UNREAD' | 'CASE_UPDATES' | 'EVIDENCE' | 'TIMELINE' | 'SECURITY' | 'AI_ANALYSIS' | 'SYSTEM';
+export type NotificationPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type NotificationType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ALERT' | 'CASE' | 'EVIDENCE' | 'TIMELINE' | 'SECURITY' | 'AI_ANALYSIS' | 'SYSTEM';
+
 export interface NotificationItem {
   id: string;
   title: string;
   message: string;
+  description?: string;
   createdAt: string;
   read: boolean;
-  type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ALERT';
+  type: NotificationType;
+  priority?: NotificationPriority;
+  category?: NotificationCategory;
+  caseId?: string;
+  evidenceId?: string;
+  actionUrl?: string;
+  user?: string;
+}
+
+export interface Notification extends NotificationItem {
+  type: NotificationType;
+  category: NotificationCategory;
+  priority: NotificationPriority;
+  description: string;
 }
 
 export interface Activity {

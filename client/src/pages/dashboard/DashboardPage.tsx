@@ -4,10 +4,15 @@ import { Card } from '../../components/ui/Card';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { StatCard } from '../../components/ui/StatCard';
 import { DashboardCharts } from '../../components/dashboard/DashboardCharts';
-import { mockActivities, mockCases, mockDashboardStats, mockEvidence } from '../../data/mockData';
 import { Badge } from '../../components/ui/Badge';
+import { dashboardService } from '../../services/dashboard.service';
 
 const DashboardPage = () => {
+  const stats = dashboardService.getStats();
+  const cases = dashboardService.getCases();
+  const evidence = dashboardService.getEvidence();
+  const activities = dashboardService.getActivities();
+
   return (
     <AppLayout title="Dashboard">
       <PageHeader
@@ -16,16 +21,16 @@ const DashboardPage = () => {
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Total Cases" value={mockDashboardStats.totalCases} description="All active and archived matters" icon={<Briefcase size={18} />} />
-        <StatCard title="Active Cases" value={mockDashboardStats.activeCases} description="Cases currently in motion" icon={<ShieldCheck size={18} />} />
-        <StatCard title="Evidence Files" value={mockDashboardStats.evidenceFiles} description="Stored and reviewed items" icon={<FolderKanban size={18} />} />
-        <StatCard title="Pending Reviews" value={mockDashboardStats.pendingReviews} description="Awaiting legal or investigative review" icon={<Sparkles size={18} />} />
+        <StatCard title="Total Cases" value={stats.totalCases} description="All active and archived matters" icon={<Briefcase size={18} />} />
+        <StatCard title="Active Cases" value={stats.activeCases} description="Cases currently in motion" icon={<ShieldCheck size={18} />} />
+        <StatCard title="Evidence Files" value={stats.evidenceFiles} description="Stored and reviewed items" icon={<FolderKanban size={18} />} />
+        <StatCard title="Pending Reviews" value={stats.pendingReviews} description="Awaiting legal or investigative review" icon={<Sparkles size={18} />} />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
         <Card title="Recent Cases" description="Latest matters requiring attention.">
           <div className="space-y-3">
-            {mockCases.map((item) => (
+            {cases.map((item) => (
               <div key={item.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <div>
                   <p className="font-medium text-slate-900">{item.title}</p>
@@ -39,7 +44,7 @@ const DashboardPage = () => {
 
         <Card title="Recent Evidence" description="Recently added evidence records.">
           <div className="space-y-3">
-            {mockEvidence.map((item) => (
+            {evidence.map((item) => (
               <div key={item.id} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <div className="flex items-center justify-between">
                   <p className="font-medium text-slate-900">{item.title}</p>
@@ -56,7 +61,7 @@ const DashboardPage = () => {
         <DashboardCharts />
         <Card title="Recent Activity" description="Latest updates from the legal workflow platform.">
           <div className="space-y-3">
-            {mockActivities.map((activity) => (
+            {activities.map((activity) => (
               <div key={activity.id} className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600"><Activity size={16} /></div>
                 <div>

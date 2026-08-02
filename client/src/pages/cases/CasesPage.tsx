@@ -10,7 +10,7 @@ import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { StatCard } from '../../components/ui/StatCard';
-import { mockCases } from '../../data/mockData';
+import { caseService } from '../../services/case.service';
 import type { CasePriority, CaseStatus } from '../../types';
 
 const CasesPage = () => {
@@ -22,11 +22,12 @@ const CasesPage = () => {
   const [sortBy, setSortBy] = useState<'updated' | 'oldest' | 'newest'>('updated');
 
   const successMessage = (location.state as { successMessage?: string } | null)?.successMessage;
+  const allCases = caseService.getCases();
 
   const filteredCases = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    const nextCases = mockCases.filter((item) => {
+    const nextCases = allCases.filter((item) => {
       const matchesStatus = status === 'ALL' || item.status === status;
       const matchesPriority = priority === 'ALL' || item.priority === priority;
       const haystack = `${item.title} ${item.caseNumber} ${item.assignedTo} ${item.client ?? ''} ${item.type ?? ''}`.toLowerCase();
@@ -49,10 +50,10 @@ const CasesPage = () => {
   }, [priority, query, sortBy, status]);
 
   const summaryCards = [
-    { title: 'Total Cases', value: mockCases.length, description: 'All active and archived matters', icon: <Briefcase size={18} /> },
-    { title: 'Active Cases', value: mockCases.filter((item) => item.status === 'ACTIVE').length, description: 'Currently in motion', icon: <ShieldCheck size={18} /> },
-    { title: 'Pending Review', value: mockCases.filter((item) => item.status === 'PENDING_REVIEW').length, description: 'Awaiting legal review', icon: <ClipboardList size={18} /> },
-    { title: 'Closed Cases', value: mockCases.filter((item) => item.status === 'CLOSED').length, description: 'Completed and archived', icon: <FolderKanban size={18} /> },
+    { title: 'Total Cases', value: allCases.length, description: 'All active and archived matters', icon: <Briefcase size={18} /> },
+    { title: 'Active Cases', value: allCases.filter((item) => item.status === 'ACTIVE').length, description: 'Currently in motion', icon: <ShieldCheck size={18} /> },
+    { title: 'Pending Review', value: allCases.filter((item) => item.status === 'PENDING_REVIEW').length, description: 'Awaiting legal review', icon: <ClipboardList size={18} /> },
+    { title: 'Closed Cases', value: allCases.filter((item) => item.status === 'CLOSED').length, description: 'Completed and archived', icon: <FolderKanban size={18} /> },
   ];
 
   return (

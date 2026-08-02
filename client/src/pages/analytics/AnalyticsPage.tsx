@@ -7,37 +7,36 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { StatCard } from '../../components/ui/StatCard';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
-import {
-  mockAnalyticsCaseTypes,
-  mockAnalyticsPriorities,
-  mockAnalyticsStatuses,
-  mockAnalyticsSummary,
-  mockCasePriorityData,
-  mockCaseStatusData,
-  mockEvidenceAnalytics,
-  mockEvidenceTypeData,
-  mockInvestigatorPerformance,
-  mockLawyerActivity,
-  mockMonthlyCaseActivity,
-  mockMonthlyEvidenceUploads,
-  mockRiskAnalytics,
-  mockTimelineAnalytics,
-  mockVerificationRate,
-} from '../../data/mockData';
+import { analyticsService } from '../../services/analytics.service';
 
 const AnalyticsPage = () => {
   const [dateRange, setDateRange] = useState('30 Days');
   const [caseType, setCaseType] = useState('All Types');
   const [priority, setPriority] = useState('All Priorities');
   const [status, setStatus] = useState('All Statuses');
+  const summary = analyticsService.getSummary();
+  const caseStatusData = analyticsService.getCaseStatusData();
+  const casePriorityData = analyticsService.getCasePriorityData();
+  const evidenceTypeData = analyticsService.getEvidenceTypeData();
+  const monthlyCaseActivity = analyticsService.getMonthlyCaseActivity();
+  const monthlyEvidenceUploads = analyticsService.getMonthlyEvidenceUploads();
+  const verificationRate = analyticsService.getVerificationRate();
+  const investigatorPerformance = analyticsService.getInvestigatorPerformance();
+  const lawyerActivity = analyticsService.getLawyerActivity();
+  const evidenceAnalytics = analyticsService.getEvidenceAnalytics();
+  const timelineAnalytics = analyticsService.getTimelineAnalytics();
+  const riskAnalytics = analyticsService.getRiskAnalytics();
+  const caseTypes = analyticsService.getCaseTypes();
+  const priorities = analyticsService.getPriorities();
+  const statuses = analyticsService.getStatuses();
 
   const riskBreakdown = useMemo(
     () => [
-      { label: 'Low', value: mockRiskAnalytics.low, color: '#22c55e' },
-      { label: 'Medium', value: mockRiskAnalytics.medium, color: '#f59e0b' },
-      { label: 'High', value: mockRiskAnalytics.high, color: '#ef4444' },
+      { label: 'Low', value: riskAnalytics.low, color: '#22c55e' },
+      { label: 'Medium', value: riskAnalytics.medium, color: '#f59e0b' },
+      { label: 'High', value: riskAnalytics.high, color: '#ef4444' },
     ],
-    []
+    [riskAnalytics]
   );
 
   return (
@@ -72,7 +71,7 @@ const AnalyticsPage = () => {
           <label className="block text-sm text-slate-600">
             <span className="mb-1.5 block font-medium text-slate-700">Case Type</span>
             <select value={caseType} onChange={(event) => setCaseType(event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
-              {mockAnalyticsCaseTypes.map((item) => (
+              {caseTypes.map((item) => (
                 <option key={item} value={item}>{item}</option>
               ))}
             </select>
@@ -81,7 +80,7 @@ const AnalyticsPage = () => {
           <label className="block text-sm text-slate-600">
             <span className="mb-1.5 block font-medium text-slate-700">Priority</span>
             <select value={priority} onChange={(event) => setPriority(event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
-              {mockAnalyticsPriorities.map((item) => (
+              {priorities.map((item) => (
                 <option key={item} value={item}>{item}</option>
               ))}
             </select>
@@ -90,7 +89,7 @@ const AnalyticsPage = () => {
           <label className="block text-sm text-slate-600">
             <span className="mb-1.5 block font-medium text-slate-700">Status</span>
             <select value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
-              {mockAnalyticsStatuses.map((item) => (
+              {statuses.map((item) => (
                 <option key={item} value={item}>{item}</option>
               ))}
             </select>
@@ -99,12 +98,12 @@ const AnalyticsPage = () => {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <StatCard title="Total Cases" value={mockAnalyticsSummary.totalCases} description="All active and archived matters" icon={<Briefcase size={18} />} />
-        <StatCard title="Active Cases" value={mockAnalyticsSummary.activeCases} description="Currently active investigations" icon={<ShieldCheck size={18} />} />
-        <StatCard title="Closed Cases" value={mockAnalyticsSummary.closedCases} description="Completed and archived matters" icon={<Sparkles size={18} />} />
-        <StatCard title="Evidence Files" value={mockAnalyticsSummary.evidenceFiles} description="Stored and reviewed items" icon={<FolderKanban size={18} />} />
-        <StatCard title="Verified Evidence" value={mockAnalyticsSummary.verifiedEvidence} description="Integrity-verified items" icon={<FileText size={18} />} />
-        <StatCard title="Pending Reviews" value={mockAnalyticsSummary.pendingReviews} description="Awaiting legal review" icon={<BarChart3 size={18} />} />
+        <StatCard title="Total Cases" value={summary.totalCases} description="All active and archived matters" icon={<Briefcase size={18} />} />
+        <StatCard title="Active Cases" value={summary.activeCases} description="Currently active investigations" icon={<ShieldCheck size={18} />} />
+        <StatCard title="Closed Cases" value={summary.closedCases} description="Completed and archived matters" icon={<Sparkles size={18} />} />
+        <StatCard title="Evidence Files" value={summary.evidenceFiles} description="Stored and reviewed items" icon={<FolderKanban size={18} />} />
+        <StatCard title="Verified Evidence" value={summary.verifiedEvidence} description="Integrity-verified items" icon={<FileText size={18} />} />
+        <StatCard title="Pending Reviews" value={summary.pendingReviews} description="Awaiting legal review" icon={<BarChart3 size={18} />} />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
@@ -112,8 +111,8 @@ const AnalyticsPage = () => {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={mockCaseStatusData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={3}>
-                  {mockCaseStatusData.map((entry) => (
+                <Pie data={caseStatusData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={3}>
+                  {caseStatusData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}
                 </Pie>
@@ -127,7 +126,7 @@ const AnalyticsPage = () => {
         <Card title="Cases by Priority" description="Operational intensity across the portfolio.">
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockCasePriorityData} barSize={30}>
+              <BarChart data={casePriorityData} barSize={30}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
@@ -142,8 +141,8 @@ const AnalyticsPage = () => {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={mockEvidenceTypeData} dataKey="value" nameKey="name" innerRadius={58} outerRadius={90} paddingAngle={3}>
-                  {mockEvidenceTypeData.map((entry) => (
+                <Pie data={evidenceTypeData} dataKey="value" nameKey="name" innerRadius={58} outerRadius={90} paddingAngle={3}>
+                  {evidenceTypeData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}
                 </Pie>
@@ -157,7 +156,7 @@ const AnalyticsPage = () => {
         <Card title="Monthly Case Activity" description="Case progression over the past eight months.">
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockMonthlyCaseActivity}>
+              <LineChart data={monthlyCaseActivity}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="month" tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
@@ -171,7 +170,7 @@ const AnalyticsPage = () => {
         <Card title="Monthly Evidence Uploads" description="Evidence intake trend and preservation volume.">
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={mockMonthlyEvidenceUploads}>
+              <AreaChart data={monthlyEvidenceUploads}>
                 <defs>
                   <linearGradient id="uploadFill" x1="0" x2="0" y1="0" y2="1">
                     <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.55} />
@@ -191,7 +190,7 @@ const AnalyticsPage = () => {
         <Card title="Evidence Verification Rate" description="Verified material against pending review backlog.">
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <RadialBarChart innerRadius="40%" outerRadius="95%" data={mockVerificationRate} startAngle={90} endAngle={-270}>
+              <RadialBarChart innerRadius="40%" outerRadius="95%" data={verificationRate} startAngle={90} endAngle={-270}>
                 <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
                 <RadialBar background dataKey="value" cornerRadius={10} />
                 <Tooltip />
@@ -219,7 +218,7 @@ const AnalyticsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockInvestigatorPerformance.map((person) => (
+                {investigatorPerformance.map((person) => (
                   <tr key={person.investigator} className="border-b border-slate-100 text-slate-700">
                     <td className="px-3 py-3 font-medium text-slate-900">{person.investigator}</td>
                     <td className="px-3 py-3">{person.assignedCases}</td>
@@ -235,7 +234,7 @@ const AnalyticsPage = () => {
 
         <Card title="Lawyer Activity" description="Attorney workload and filing activity.">
           <div className="space-y-4">
-            {mockLawyerActivity.map((lawyer) => (
+            {lawyerActivity.map((lawyer) => (
               <div key={lawyer.lawyer} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-medium text-slate-900">{lawyer.lawyer}</p>
@@ -264,7 +263,7 @@ const AnalyticsPage = () => {
       <div className="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <Card title="Evidence Analytics" description="Top evidence categories by share of total collection.">
           <div className="space-y-4">
-            {mockEvidenceAnalytics.map((item) => (
+            {evidenceAnalytics.map((item) => (
               <div key={item.type}>
                 <div className="mb-1 flex items-center justify-between text-sm text-slate-700">
                   <span>{item.type}</span>
@@ -281,10 +280,10 @@ const AnalyticsPage = () => {
         <Card title="Timeline Analytics" description="Platform activity and evidence throughput over the selected period.">
           <div className="grid gap-4 md:grid-cols-2">
             {[
-              { label: 'Events Today', value: mockTimelineAnalytics.eventsToday, icon: <Activity size={16} /> },
-              { label: 'Events This Week', value: mockTimelineAnalytics.eventsThisWeek, icon: <BarChart3 size={16} /> },
-              { label: 'Evidence Uploaded', value: mockTimelineAnalytics.evidenceUploaded, icon: <FolderKanban size={16} /> },
-              { label: 'Integrity Verifications', value: mockTimelineAnalytics.integrityVerifications, icon: <ShieldCheck size={16} /> },
+              { label: 'Events Today', value: timelineAnalytics.eventsToday, icon: <Activity size={16} /> },
+              { label: 'Events This Week', value: timelineAnalytics.eventsThisWeek, icon: <BarChart3 size={16} /> },
+              { label: 'Evidence Uploaded', value: timelineAnalytics.evidenceUploaded, icon: <FolderKanban size={16} /> },
+              { label: 'Integrity Verifications', value: timelineAnalytics.integrityVerifications, icon: <ShieldCheck size={16} /> },
             ].map((metric) => (
               <div key={metric.label} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="mb-2 flex items-center gap-2 text-slate-500">{metric.icon}<span className="text-sm">{metric.label}</span></div>
@@ -301,7 +300,7 @@ const AnalyticsPage = () => {
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Risk Score</p>
-                <p className="mt-1 text-3xl font-semibold text-slate-900">{mockRiskAnalytics.score}</p>
+                <p className="mt-1 text-3xl font-semibold text-slate-900">{riskAnalytics.score}</p>
               </div>
               <div className="rounded-xl bg-amber-50 p-2 text-amber-600"><AlertTriangle size={20} /></div>
             </div>

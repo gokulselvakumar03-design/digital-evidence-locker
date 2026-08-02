@@ -9,7 +9,7 @@ import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { StatCard } from '../../components/ui/StatCard';
-import { mockEvidence } from '../../data/mockData';
+import { evidenceService } from '../../services/evidence.service';
 import type { EvidenceType, IntegrityStatus, ReviewStatus } from '../../types';
 
 const EvidencePage = () => {
@@ -19,11 +19,12 @@ const EvidencePage = () => {
   const [integrityFilter, setIntegrityFilter] = useState<'ALL' | IntegrityStatus>('ALL');
   const [reviewFilter, setReviewFilter] = useState<'ALL' | ReviewStatus>('ALL');
   const [sortBy, setSortBy] = useState<'uploaded' | 'oldest' | 'name' | 'size'>('uploaded');
+  const allEvidence = evidenceService.getEvidence();
 
   const filteredEvidence = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    const nextEvidence = mockEvidence.filter((item) => {
+    const nextEvidence = allEvidence.filter((item) => {
       const matchesType = typeFilter === 'ALL' || item.type === typeFilter;
       const matchesIntegrity = integrityFilter === 'ALL' || item.integrityStatus === integrityFilter;
       const matchesReview = reviewFilter === 'ALL' || item.reviewStatus === reviewFilter;
@@ -47,10 +48,10 @@ const EvidencePage = () => {
   }, [integrityFilter, query, reviewFilter, sortBy, typeFilter]);
 
   const summaryCards = [
-    { title: 'Total Evidence', value: mockEvidence.length, description: 'Evidence records staged for review', icon: <FolderKanban size={18} /> },
-    { title: 'Verified', value: mockEvidence.filter((item) => item.integrityStatus === 'VERIFIED').length, description: 'Integrity checks passed', icon: <ShieldCheck size={18} /> },
-    { title: 'Pending Review', value: mockEvidence.filter((item) => item.reviewStatus === 'PENDING_REVIEW').length, description: 'Awaiting legal review', icon: <Sparkles size={18} /> },
-    { title: 'Integrity Alerts', value: mockEvidence.filter((item) => item.integrityStatus === 'FAILED' || item.integrityStatus === 'FLAGGED').length, description: 'Items requiring attention', icon: <ScanLine size={18} /> },
+    { title: 'Total Evidence', value: allEvidence.length, description: 'Evidence records staged for review', icon: <FolderKanban size={18} /> },
+    { title: 'Verified', value: allEvidence.filter((item) => item.integrityStatus === 'VERIFIED').length, description: 'Integrity checks passed', icon: <ShieldCheck size={18} /> },
+    { title: 'Pending Review', value: allEvidence.filter((item) => item.reviewStatus === 'PENDING_REVIEW').length, description: 'Awaiting legal review', icon: <Sparkles size={18} /> },
+    { title: 'Integrity Alerts', value: allEvidence.filter((item) => item.integrityStatus === 'FAILED' || item.integrityStatus === 'FLAGGED').length, description: 'Items requiring attention', icon: <ScanLine size={18} /> },
   ];
 
   return (

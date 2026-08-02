@@ -13,6 +13,11 @@ import TimelinePage from '../pages/timeline/TimelinePage';
 import AnalyticsPage from '../pages/analytics/AnalyticsPage';
 import NotificationsPage from '../pages/notifications/NotificationsPage';
 import ProfilePage from '../pages/profile/ProfilePage';
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
+import AdminUsersPage from '../pages/admin/AdminUsersPage';
+import AdminRolesPage from '../pages/admin/AdminRolesPage';
+import AdminAuditPage from '../pages/admin/AdminAuditPage';
+import AdminSettingsPage from '../pages/admin/AdminSettingsPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -44,6 +49,11 @@ export const AppRoutes = () => {
       <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
+      <Route path="/admin/roles" element={<ProtectedRoute><AdminRolesPage /></ProtectedRoute>} />
+      <Route path="/admin/audit" element={<ProtectedRoute><AdminAuditPage /></ProtectedRoute>} />
+      <Route path="/admin/settings" element={<ProtectedRoute><AdminSettingsPage /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
