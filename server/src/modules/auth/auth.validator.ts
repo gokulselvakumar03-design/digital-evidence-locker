@@ -10,7 +10,7 @@ export const validateRequest = (req: Request, _res: Response, next: NextFunction
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map((err) => err.msg).join(', ');
-    throw new ApiError(400, `Validation Error: ${errorMessages}`);
+    return next(new ApiError(400, `Validation Error: ${errorMessages}`));
   }
   next();
 };

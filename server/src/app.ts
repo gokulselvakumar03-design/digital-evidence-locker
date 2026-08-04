@@ -61,10 +61,6 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // 4. API Route Mounts
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/cases', caseRoutes);
-
 const apiV1Router = express.Router();
 
 apiV1Router.use('/auth', authRoutes);

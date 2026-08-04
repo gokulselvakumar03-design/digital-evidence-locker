@@ -25,10 +25,23 @@ export const errorHandler = (
 
   logger.error(`Error ${statusCode}: ${message}`, { stack: err.stack });
 
+  const getErrorCodeString = (code: number): string => {
+    switch (code) {
+      case 400: return 'BAD_REQUEST';
+      case 401: return 'UNAUTHORIZED';
+      case 403: return 'FORBIDDEN';
+      case 404: return 'RESOURCE_NOT_FOUND';
+      case 409: return 'CONFLICT';
+      case 422: return 'UNPROCESSABLE_ENTITY';
+      case 429: return 'TOO_MANY_REQUESTS';
+      default: return 'INTERNAL_SERVER_ERROR';
+    }
+  };
+
   res.status(statusCode).json({
     success: false,
     error: {
-      code: statusCode === 404 ? 'RESOURCE_NOT_FOUND' : 'INTERNAL_SERVER_ERROR',
+      code: getErrorCodeString(statusCode),
       message: message,
       ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     },

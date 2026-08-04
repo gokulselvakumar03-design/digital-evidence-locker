@@ -23,11 +23,15 @@ export const authenticate = (req: AuthenticatedRequest, _res: Response, next: Ne
   }
 
   if (!token) {
-    throw new ApiError(401, 'Authentication token missing or not provided');
+    return next(new ApiError(401, 'Authentication token missing or not provided'));
   }
 
-  // Verify and decode token (JwtHelper throws 401 for expired/invalid tokens)
-  const decoded = JwtHelper.verifyToken(token);
-  req.user = decoded;
-  next();
+  try {
+    // Verify and decode token (JwtHelper throws 401 for expired/invalid tokens)
+    const decoded = JwtHelper.verifyToken(token);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
