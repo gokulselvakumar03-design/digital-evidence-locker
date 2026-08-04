@@ -1,11 +1,14 @@
-import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import AppRoutes from './routes';
 
-export const App: React.FC = () => {
+const App = () => {
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1>Digital Evidence Locker & Legal Workflow Platform</h1>
-      <p>Frontend client scaffolded and ready for development.</p>
-    </div>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 
