@@ -19,12 +19,16 @@ datasource db {
 enum Role {
   ADMIN
   INVESTIGATOR
+  LAWYER
+  VIEWER
   LEGAL_COUNSEL
   AUDITOR
 }
 
 enum CaseStatus {
   OPEN
+  UNDER_INVESTIGATION
+  IN_REVIEW
   UNDER_REVIEW
   CLOSED
   ARCHIVED
@@ -34,6 +38,7 @@ enum CasePriority {
   LOW
   MEDIUM
   HIGH
+  CRITICAL
   URGENT
 }
 
@@ -48,19 +53,25 @@ enum EvidenceType {
 
 enum EvidenceStatus {
   PENDING
+  UPLOADED
   VERIFIED
-  TAMPERED
+  UNDER_REVIEW
+  APPROVED
   REJECTED
+  ARCHIVED
 }
 
-enum AIAnalysisType {
-  TRANSCRIPTION
+enum AnalysisType {
   OCR
-  SUMMARY
+  SPEECH_TO_TEXT
+  IMAGE_ANALYSIS
+  VIDEO_ANALYSIS
+  DOCUMENT_SUMMARY
+  SEMANTIC_SEARCH
   ENTITY_EXTRACTION
 }
 
-enum AIAnalysisStatus {
+enum AnalysisStatus {
   PENDING
   PROCESSING
   COMPLETED
@@ -68,12 +79,25 @@ enum AIAnalysisStatus {
 }
 
 enum AuditAction {
-  CREATE
-  READ
-  UPDATE
-  DELETE
-  EXPORT
-  VERIFY
+  LOGIN
+  LOGOUT
+  CREATE_CASE
+  UPDATE_CASE
+  DELETE_CASE
+  UPLOAD_EVIDENCE
+  UPDATE_EVIDENCE
+  DELETE_EVIDENCE
+  CREATE_COMMENT
+  UPDATE_COMMENT
+  DELETE_COMMENT
+  ASSIGN_CASE
+  CHANGE_CASE_STATUS
+  VERIFY_EVIDENCE
+  APPROVE_EVIDENCE
+  REJECT_EVIDENCE
+  AI_ANALYSIS_STARTED
+  AI_ANALYSIS_COMPLETED
+  AI_ANALYSIS_FAILED
 }
 
 // ==========================================
@@ -81,50 +105,64 @@ enum AuditAction {
 // ==========================================
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         Role     @default(INVESTIGATOR)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id           String    @id @default(uuid())
+  name         String    @default("")
+  email        String    @unique
+  password     String    @default("")
+  passwordHash String    @default("")
+  firstName    String?
+  lastName     String?
+  role         Role      @default(INVESTIGATOR)
+  isActive     Boolean   @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   // Relationships
   createdCases     Case[]         @relation("CreatedCases")
+  assignedCases    Case[]         @relation("AssignedCases")
   caseMemberships  CaseMember[]
   uploadedEvidence Evidence[]     @relation("UploadedEvidence")
   verifiedHashes   EvidenceHash[] @relation("VerifiedHashes")
   comments         Comment[]
   notifications    Notification[]
-  auditLogs        AuditLog[]
+  auditLogs        AuditLog[]     @relation("PerformedAuditLogs")
+  aiAnalyses       AIAnalysis[]   @relation("CreatedAIAnalyses")
 
   @@index([email])
   @@index([role])
+  @@index([deletedAt])
 }
 
 model Case {
-  id          String       @id @default(uuid())
-  caseNumber  String       @unique
-  title       String
-  description String?      @db.Text
-  status      CaseStatus   @default(OPEN)
-  priority    CasePriority @default(MEDIUM)
-  createdById String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id           String       @id @default(uuid())
+  caseNumber   String       @unique
+  title        String
+  description  String?      @db.Text
+  category     String       @default("GENERAL")
+  status       CaseStatus   @default(OPEN)
+  priority     CasePriority @default(MEDIUM)
+  createdById  String
+  assignedToId String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  closedAt     DateTime?
+  deletedAt    DateTime?
 
   // Relationships
-  createdBy User         @relation("CreatedCases", fields: [createdById], references: [id], onDelete: Restrict)
-  members   CaseMember[]
-  evidence  Evidence[]
-  comments  Comment[]
+  createdBy  User         @relation("CreatedCases", fields: [createdById], references: [id], onDelete: Restrict)
+  assignedTo User?        @relation("AssignedCases", fields: [assignedToId], references: [id], onDelete: SetNull)
+  members    CaseMember[]
+  evidence   Evidence[]
+  comments   Comment[]
 
   @@index([caseNumber])
   @@index([status])
   @@index([priority])
   @@index([createdById])
+  @@index([assignedToId])
+  @@index([category])
+  @@index([deletedAt])
 }
 
 model CaseMember {
@@ -144,30 +182,41 @@ model CaseMember {
 }
 
 model Evidence {
-  id           String         @id @default(uuid())
-  caseId       String
-  uploadedById String
-  title        String
-  description  String?        @db.Text
-  fileUrl      String
-  fileSize     Int
-  mimeType     String
-  type         EvidenceType   @default(DOCUMENT)
-  status       EvidenceStatus @default(PENDING)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id               String         @id @default(uuid())
+  evidenceNumber   String         @unique
+  caseId           String
+  uploadedById     String
+  title            String
+  description      String?        @db.Text
+  fileName         String
+  originalFileName String
+  fileType         String
+  mimeType         String
+  fileSize         Int
+  storageUrl       String
+  thumbnailUrl     String?
+  hash             String
+  status           EvidenceStatus @default(PENDING)
+  tags             String[]       @default([])
+  remarks          String?        @db.Text
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  deletedAt        DateTime?
 
   // Relationships
-  case       Case         @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  uploadedBy User         @relation("UploadedEvidence", fields: [uploadedById], references: [id], onDelete: Restrict)
-  hash       EvidenceHash?
+  case       Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  uploadedBy User          @relation("UploadedEvidence", fields: [uploadedById], references: [id], onDelete: Restrict)
+  hashRecord EvidenceHash?
   comments   Comment[]
   analyses   AIAnalysis[]
 
+  @@index([evidenceNumber])
   @@index([caseId])
   @@index([uploadedById])
   @@index([status])
-  @@index([type])
+  @@index([fileType])
+  @@index([hash])
+  @@index([deletedAt])
 }
 
 model EvidenceHash {
@@ -186,73 +235,110 @@ model EvidenceHash {
 }
 
 model AuditLog {
-  id         String      @id @default(uuid())
-  userId     String?
-  action     AuditAction
-  entityName String
-  entityId   String
-  details    Json?
-  ipAddress  String?
-  userAgent  String?
-  timestamp  DateTime    @default(now())
+  id            String      @id @default(uuid())
+  action        AuditAction
+  entityType    String
+  entityId      String
+  description   String      @default("") @db.Text
+  performedById String
+  ipAddress     String?
+  userAgent     String?
+  oldValue      Json?
+  newValue      Json?
+  createdAt     DateTime    @default(now())
 
   // Relationships
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  performedBy User @relation("PerformedAuditLogs", fields: [performedById], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@index([action])
-  @@index([timestamp])
-  @@index([entityName, entityId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([performedById])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
+
+enum NotificationType {
+  CASE_ASSIGNED
+  CASE_UPDATED
+  CASE_CLOSED
+  EVIDENCE_UPLOADED
+  EVIDENCE_APPROVED
+  EVIDENCE_REJECTED
+  NEW_COMMENT
+  AI_ANALYSIS_COMPLETED
+  AI_ANALYSIS_FAILED
+  SYSTEM
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  title     String
-  message   String   @db.Text
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id         String           @id @default(uuid())
+  title      String
+  message    String           @db.Text
+  type       NotificationType @default(SYSTEM)
+  userId     String
+  isRead     Boolean          @default(false)
+  readAt     DateTime?
+  entityType String?
+  entityId   String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   // Relationships
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
 }
 
 model Comment {
-  id         String   @id @default(uuid())
-  caseId     String
-  evidenceId String?
-  authorId   String
-  content    String   @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String    @id @default(uuid())
+  content         String    @db.Text
+  caseId          String?
+  evidenceId      String?
+  userId          String
+  parentCommentId String?
+  isEdited        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
 
   // Relationships
-  case     Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  evidence Evidence? @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
-  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  case          Case?     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  evidence      Evidence? @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentComment Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies       Comment[] @relation("CommentReplies")
 
   @@index([caseId])
   @@index([evidenceId])
-  @@index([authorId])
+  @@index([userId])
+  @@index([parentCommentId])
+  @@index([deletedAt])
 }
 
 model AIAnalysis {
-  id           String           @id @default(uuid())
-  evidenceId   String
-  type         AIAnalysisType
-  status       AIAnalysisStatus @default(PENDING)
-  result       Json?
-  errorMessage String?          @db.Text
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  id             String         @id @default(uuid())
+  evidenceId     String
+  analysisType   AnalysisType
+  status         AnalysisStatus @default(PENDING)
+  requestId      String?
+  result         Json?
+  summary        String?        @db.Text
+  confidence     Float?
+  processingTime Float?
+  createdById    String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   // Relationships
-  evidence Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  evidence  Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  createdBy User     @relation("CreatedAIAnalyses", fields: [createdById], references: [id], onDelete: Cascade)
 
   @@index([evidenceId])
   @@index([status])
-  @@index([type])
+  @@index([analysisType])
+  @@index([createdById])
 }

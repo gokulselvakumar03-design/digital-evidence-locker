@@ -1,14 +1,13 @@
 /**
  * Authentication Data Transfer Objects (DTOs)
  * Path: server/src/modules/auth/auth.dto.ts
- * Purpose: Defines input request structures for registration, login, and token handling.
+ * Purpose: Defines request and response payload structures for Auth endpoints.
  */
 
 export interface RegisterUserDto {
+  name: string;
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
   role?: string;
 }
 
@@ -21,9 +20,10 @@ export interface AuthResponseDto {
   token: string;
   user: {
     id: string;
+    name: string;
     email: string;
-    firstName: string;
-    lastName: string;
     role: string;
+    createdAt: Date;
+    updatedAt: Date;
   };
 }

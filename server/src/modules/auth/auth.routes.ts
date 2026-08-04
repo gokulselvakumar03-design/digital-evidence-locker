@@ -2,20 +2,26 @@ import { Router } from 'express';
 import {
   registerController,
   loginController,
+  getProfileController,
   logoutController,
-  getMeController,
 } from './auth.controller.js';
+import { registerValidation, loginValidation } from './auth.validator.js';
+import { authenticate } from '../../middlewares/auth.middleware.js';
 
 /**
  * Authentication Express Router Setup
  * Path: server/src/modules/auth/auth.routes.ts
- * Purpose: Registers routes for auth operations under /api/v1/auth.
+ * Purpose: Connects validation middlewares, auth middlewares, and controllers for authentication endpoints.
  */
 const router = Router();
 
-router.post('/register', registerController);
-router.post('/login', loginController);
+// Public Authentication Routes
+router.post('/register', registerValidation, registerController);
+router.post('/login', loginValidation, loginController);
 router.post('/logout', logoutController);
-router.get('/me', getMeController);
+
+// Protected Profile Routes
+router.get('/profile', authenticate, getProfileController);
+router.get('/me', authenticate, getProfileController);
 
 export default router;

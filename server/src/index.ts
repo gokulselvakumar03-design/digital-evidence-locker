@@ -1,4 +1,4 @@
-import app from './app.js';
+import app from "./app";
 import { config } from './config/env.config.js';
 import { logger } from './config/logger.js';
 import prisma from './config/prisma.js';

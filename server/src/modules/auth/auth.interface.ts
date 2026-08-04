@@ -4,16 +4,11 @@
  * Purpose: Defines domain entity interfaces and contract types for authentication operations.
  */
 
-export interface IAuthUser {
+export interface IUserProfileResponse {
   id: string;
+  name: string;
   email: string;
   role: string;
-}
-
-export interface ITokenPayload {
-  userId: string;
-  email: string;
-  role: string;
-  iat?: number;
-  exp?: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
